@@ -2,6 +2,7 @@ require('dotenv').config();
 const WebSocket = require('ws');
 const { initializeApp, cert } = require('firebase-admin/app');
 const { getFirestore } = require('firebase-admin/firestore');
+const { classifyShipType } = require('../shared/shipType');
 
 const serviceAccount = require('./serviceAccountKey.json');
 initializeApp({
@@ -11,6 +12,12 @@ const db = getFirestore();
 
 const API_KEY = process.env.AISSTREAM_API_KEY;
 const SINGAPORE_STRAIT_BOX = [[1.05, 103.5], [1.35, 104.1]];
+
+// AIS sends vessel type as a separate message from position reports, so we
+// cache it by MMSI as ShipStaticData messages arrive and attach it to
+// whatever position records come in afterward. A vessel we haven't received
+// static data for yet is recorded as 'unknown' rather than blocking on it.
+const shipTypeByMmsi = new Map();
 
 // AISStream has a history of silent outages (connects fine, subscription is
 // accepted, but zero messages ever arrive — see aisstream/aisstream#15).
@@ -46,7 +53,14 @@ function connect() {
     lastMessageAt = Date.now();
     const message = JSON.parse(data);
 
-    // Only handle position reports — AISStream sends other message types too
+    if (message.MessageType === 'ShipStaticData') {
+      const staticData = message.Message.ShipStaticData;
+      shipTypeByMmsi.set(String(staticData.UserID), classifyShipType(staticData.Type));
+      return;
+    }
+
+    // Only handle position reports beyond this point — AISStream sends other
+    // message types too (ShipStaticData, above, plus several we don't use)
     if (message.MessageType !== 'PositionReport') return;
 
     const report = message.Message.PositionReport;
@@ -54,6 +68,7 @@ function connect() {
 
     const positionRecord = {
       mmsi: String(mmsi),
+      vesselType: shipTypeByMmsi.get(String(mmsi)) ?? 'unknown',
       lat: report.Latitude,
       lon: report.Longitude,
       speed: report.Sog, // Speed over ground, in knots

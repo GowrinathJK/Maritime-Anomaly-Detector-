@@ -1,13 +1,16 @@
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
+import NavBar from "../components/NavBar";
+import { VesselDataProvider } from "../context/VesselDataContext";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const plexMono = IBM_Plex_Mono({
+  variable: "--font-plex-mono",
+  weight: ["400", "500", "600"],
   subsets: ["latin"],
 });
 
@@ -19,12 +22,12 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-    >
-      <body className="min-h-full flex flex-col bg-neutral-50 text-neutral-900 dark:bg-neutral-950 dark:text-neutral-100">
-        {children}
+    <html lang="en" className={`${inter.variable} ${plexMono.variable} h-full antialiased`}>
+      <body className="min-h-full flex flex-col bg-[var(--color-bg)] text-[var(--color-text)]">
+        <VesselDataProvider>
+          <NavBar />
+          {children}
+        </VesselDataProvider>
       </body>
     </html>
   );

@@ -5,14 +5,15 @@ import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import { RISK_TIERS, riskTier } from '../lib/risk';
+import { useVesselData } from '../context/VesselDataContext';
 
 const SINGAPORE_STRAIT_CENTER = [1.15, 103.8];
 
-function markerIcon(tier, isSelected) {
+function markerIcon(tier, isSelected, isNew) {
   const size = isSelected ? 22 : 15;
   return L.divIcon({
     className: '',
-    html: `<span style="display:block;width:${size}px;height:${size}px;border-radius:9999px;background:${tier.color};border:2px solid white;box-shadow:0 1px 4px rgba(0,0,0,0.4)${
+    html: `<span class="${isNew ? 'flash-new' : ''}" style="display:block;width:${size}px;height:${size}px;border-radius:9999px;background:${tier.color};border:2px solid #070c17;box-shadow:0 1px 4px rgba(0,0,0,0.5)${
       isSelected ? `,0 0 0 4px ${tier.color}55` : ''
     };"></span>`,
     iconSize: [size, size],
@@ -53,6 +54,7 @@ function FlyToSelected({ vessel }) {
 }
 
 export default function VesselMap({ vessels, selectedMmsi, onSelect }) {
+  const { unseenMmsis } = useVesselData();
   const selectedVessel = vessels.find((v) => v.mmsi === selectedMmsi) ?? null;
 
   return (
@@ -66,6 +68,7 @@ export default function VesselMap({ vessels, selectedMmsi, onSelect }) {
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          className="opacity-90 grayscale-[15%] brightness-90 hue-rotate-[190deg] invert-[92%] contrast-[90%]"
         />
         <FitBoundsOnChange vessels={vessels} />
         <FlyToSelected vessel={selectedVessel} />
@@ -73,11 +76,12 @@ export default function VesselMap({ vessels, selectedMmsi, onSelect }) {
         {vessels.map((v) => {
           const tier = riskTier(v.score);
           const isSelected = v.mmsi === selectedMmsi;
+          const isNew = unseenMmsis.has(v.mmsi);
           return (
             <Marker
               key={v.mmsi}
               position={[v.lastPosition.lat, v.lastPosition.lon]}
-              icon={markerIcon(tier, isSelected)}
+              icon={markerIcon(tier, isSelected, isNew)}
               eventHandlers={{ click: () => onSelect(v.mmsi) }}
               zIndexOffset={isSelected ? 1000 : 0}
             >
@@ -87,12 +91,12 @@ export default function VesselMap({ vessels, selectedMmsi, onSelect }) {
                     <span className="font-mono">{v.mmsi}</span>
                     <span style={{ color: tier.color }}>{tier.label} · {v.score}</span>
                   </div>
-                  <ul className="mt-1 list-disc pl-4 text-neutral-600">
+                  <ul className="mt-1 list-disc pl-4 text-[var(--color-text-muted)]">
                     {v.reasons.map((r, i) => (
                       <li key={i}>{r}</li>
                     ))}
                   </ul>
-                  <div className="mt-1 text-xs text-neutral-400">
+                  <div className="mt-1 text-xs text-[var(--color-text-muted)]">
                     Last seen {new Date(v.lastPosition.timestamp).toLocaleString()}
                   </div>
                 </div>
@@ -110,8 +114,8 @@ export default function VesselMap({ vessels, selectedMmsi, onSelect }) {
         )}
       </MapContainer>
 
-      <div className="absolute bottom-3 left-3 z-[1000] rounded-lg bg-white/90 px-3 py-2 text-xs shadow ring-1 ring-black/5 backdrop-blur dark:bg-neutral-900/90 dark:ring-white/10">
-        <div className="mb-1 font-medium text-neutral-500 dark:text-neutral-400">Risk level</div>
+      <div className="absolute bottom-3 left-3 z-[1000] rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)]/95 px-3 py-2 text-xs shadow backdrop-blur">
+        <div className="mb-1 font-medium text-[var(--color-text-muted)]">Risk level</div>
         <div className="flex items-center gap-3">
           {RISK_TIERS.map((tier) => (
             <div key={tier.key} className="flex items-center gap-1.5">
@@ -119,7 +123,7 @@ export default function VesselMap({ vessels, selectedMmsi, onSelect }) {
                 className="inline-block h-2.5 w-2.5 rounded-full"
                 style={{ backgroundColor: tier.color }}
               />
-              <span className="text-neutral-700 dark:text-neutral-300">{tier.label}</span>
+              <span className="text-[var(--color-text)]">{tier.label}</span>
             </div>
           ))}
         </div>

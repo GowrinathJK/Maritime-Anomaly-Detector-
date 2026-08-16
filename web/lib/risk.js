@@ -1,26 +1,31 @@
 // Shared risk-tier presentation: map a numeric score to a label/color used
-// consistently by the map markers, table badges, and legend.
+// consistently by the map markers, table badges, notification bell, and legend.
+//
+// Colors are duplicated from the --color-risk-* tokens in globals.css rather
+// than read via CSS var() — Leaflet writes marker/polyline colors as raw SVG
+// attributes (not inline style), where var() resolution isn't reliable, so
+// these need to be concrete values usable directly in JS/canvas/SVG.
 export const RISK_TIERS = [
   {
     key: 'high',
     label: 'High',
     min: 30,
-    color: '#dc2626',
-    badgeClass: 'bg-red-500/10 text-red-700 ring-1 ring-inset ring-red-600/20 dark:text-red-400 dark:ring-red-500/30',
+    color: '#f87171',
+    badgeClass: 'bg-[#f87171]/10 text-[#f87171] ring-1 ring-inset ring-[#f87171]/30',
   },
   {
     key: 'medium',
     label: 'Medium',
     min: 15,
-    color: '#ea580c',
-    badgeClass: 'bg-orange-500/10 text-orange-700 ring-1 ring-inset ring-orange-600/20 dark:text-orange-400 dark:ring-orange-500/30',
+    color: '#fbbf24',
+    badgeClass: 'bg-[#fbbf24]/10 text-[#fbbf24] ring-1 ring-inset ring-[#fbbf24]/30',
   },
   {
     key: 'low',
     label: 'Low',
     min: 0,
-    color: '#ca8a04',
-    badgeClass: 'bg-yellow-500/10 text-yellow-700 ring-1 ring-inset ring-yellow-600/20 dark:text-yellow-400 dark:ring-yellow-500/30',
+    color: '#60a5fa',
+    badgeClass: 'bg-[#60a5fa]/10 text-[#60a5fa] ring-1 ring-inset ring-[#60a5fa]/30',
   },
 ];
 

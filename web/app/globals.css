@@ -1,26 +1,66 @@
 @import "tailwindcss";
 
+/* Nautical ops-console palette. This is a fixed dark theme by design — not
+   toggled by prefers-color-scheme — the same way most maritime/aviation ops
+   tools commit to one console look rather than following OS preference. */
+:root {
+  --color-bg: #070c17;
+  --color-surface: #0f1729;
+  --color-surface-hover: #16213a;
+  --color-border: #1f2c47;
+  --color-text: #e5edf7;
+  --color-text-muted: #8b9bb8;
+  --color-accent: #38bdf8;
+  --color-accent-foreground: #04202e;
+
+  --color-risk-high: #f87171;
+  --color-risk-high-bg: rgba(248, 113, 113, 0.12);
+  --color-risk-medium: #fbbf24;
+  --color-risk-medium-bg: rgba(251, 191, 36, 0.12);
+  --color-risk-low: #60a5fa;
+  --color-risk-low-bg: rgba(96, 165, 250, 0.12);
+}
+
 @theme inline {
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-bg: var(--color-bg);
+  --color-surface: var(--color-surface);
+  --color-surface-hover: var(--color-surface-hover);
+  --color-border: var(--color-border);
+  --color-text: var(--color-text);
+  --color-text-muted: var(--color-text-muted);
+  --color-accent: var(--color-accent);
+  --color-accent-foreground: var(--color-accent-foreground);
+  --font-sans: var(--font-inter);
+  --font-mono: var(--font-plex-mono);
 }
 
 body {
+  background: var(--color-bg);
+  color: var(--color-text);
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
 }
 
-/* Leaflet's popup chrome ships its own light-only styling — patch it so it
-   doesn't look broken against a dark page background. */
+/* Leaflet's popup chrome ships its own light-only styling — override it to
+   match the console theme instead of looking like a broken light-mode popup. */
 .leaflet-popup-content-wrapper,
 .leaflet-popup-tip {
-  background: #fff;
-  color: #171717;
+  background: var(--color-surface);
+  color: var(--color-text);
 }
 
-@media (prefers-color-scheme: dark) {
-  .leaflet-popup-content-wrapper,
-  .leaflet-popup-tip {
-    background: #18181b;
-    color: #e4e4e7;
-  }
+.leaflet-popup-content-wrapper {
+  border: 1px solid var(--color-border);
+}
+
+.leaflet-container a.leaflet-popup-close-button {
+  color: var(--color-text-muted);
+}
+
+@keyframes flash-new {
+  0%, 100% { background-color: transparent; }
+  20%, 60% { background-color: var(--color-risk-high-bg); }
+}
+
+.flash-new {
+  animation: flash-new 2.4s ease-in-out 2;
 }

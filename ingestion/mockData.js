@@ -10,6 +10,7 @@ function generatePositions() {
   for (let i = 0; i < 20; i++) {
     positions.push({
       mmsi: '111111111',
+      vesselType: 'cargo',
       lat: lat + i * 0.002,
       lon: lon + i * 0.003,
       speed: 12,
@@ -22,6 +23,7 @@ function generatePositions() {
   for (let i = 0; i < 10; i++) {
     positions.push({
       mmsi: '222222222',
+      vesselType: 'tanker',
       lat: lat + i * 0.002,
       lon: lon + i * 0.002,
       speed: 14,
@@ -30,6 +32,7 @@ function generatePositions() {
   }
   positions.push({
     mmsi: '222222222',
+    vesselType: 'tanker',
     lat: lat + 0.15,
     lon: lon + 0.2,
     speed: 13,
@@ -41,10 +44,25 @@ function generatePositions() {
   for (let i = 0; i < 15; i++) {
     positions.push({
       mmsi: '333333333',
+      vesselType: 'cruise',
       lat: lat + (Math.random() - 0.5) * 0.001,
       lon: lon + (Math.random() - 0.5) * 0.001,
       speed: 0.8,
       timestamp: now - (60 - i * 4) * 60 * 1000,
+    });
+  }
+
+  // Vessel D: normal, unflagged — exists so "unknown"/uncategorized traffic
+  // and the "All Traffic" view have something besides flagged vessels.
+  lat = 1.18; lon = 103.75;
+  for (let i = 0; i < 12; i++) {
+    positions.push({
+      mmsi: '444444444',
+      vesselType: 'unknown',
+      lat: lat - i * 0.0015,
+      lon: lon + i * 0.002,
+      speed: 10,
+      timestamp: now - (24 - i * 2) * 60 * 1000,
     });
   }
 
